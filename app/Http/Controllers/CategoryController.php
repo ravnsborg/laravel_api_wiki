@@ -6,6 +6,7 @@ use App\Http\Requests\Categories\CreateUpdateCategoryRequest;
 use App\Http\Requests\Categories\ListCategoryRequest;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
+use App\Services\Categories\CategoryService;
 use Illuminate\Support\Facades\Log;
 
 class CategoryController extends Controller
@@ -13,17 +14,12 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(ListCategoryRequest $request):object
+    public function index(ListCategoryRequest $request, CategoryService $categoryService): object
     {
-        $categories = Category::query();
 
-        if ($request->has('include')) {
-            $categories = $categories->with($request->getIncludeParameterValue());
-        }
+        $categories = $categoryService->getMany($request->getIncludeParameterValue());
 
-        $categories = $categories->get();
-
-        if (! $categories) {
+        if ($categories->isEmpty()) {
             return response()->json(
                 ['message' => 'Categories not found'],
                 self::HTTP_STATUS_CODES['not_found']
@@ -39,7 +35,7 @@ class CategoryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CreateUpdateCategoryRequest $request) : object
+    public function store(CreateUpdateCategoryRequest $request): object
     {
         try {
             $category = Category::create($request->validated());
@@ -47,7 +43,6 @@ class CategoryController extends Controller
             return response()->json([
                 'category' => new CategoryResource($category),
             ], self::HTTP_STATUS_CODES['created']);
-
         } catch (\Exception $e) {
             Log::critical('Error creating new category'.$e->getMessage());
 
@@ -60,15 +55,9 @@ class CategoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(int $id, ListCategoryRequest $request)// : object
+    public function show(int $id, ListCategoryRequest $request, CategoryService $categoryService): object
     {
-        $category = Category::find($id);
-
-        if ($request->has('include')) {
-            $category = $category->with($request->getIncludeParameterValue());
-        }
-
-        $category = $category->first();
+        $category = $categoryService->getById($id, $request->getIncludeParameterValue());
 
         if (! $category) {
             return response()->json(
@@ -94,7 +83,6 @@ class CategoryController extends Controller
             return response()->json([
                 'category' => new CategoryResource($category),
             ], self::HTTP_STATUS_CODES['created']);
-
         } catch (\Exception $e) {
             Log::critical('Error updating category'.$e->getMessage());
 
@@ -116,7 +104,6 @@ class CategoryController extends Controller
                 ['message' => 'Category deleted successfully'],
                 self::HTTP_STATUS_CODES['success']
             );
-
         } catch (\Exception $e) {
             Log::critical('Error deleting category'.$e->getMessage());
 
