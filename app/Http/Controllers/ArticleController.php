@@ -6,6 +6,7 @@ use App\Http\Requests\Articles\CreateUpdateArticleRequest;
 use App\Http\Requests\Articles\ListArticleRequest;
 use App\Http\Resources\ArticleResource;
 use App\Models\Article;
+use App\Services\Articles\ArticleService;
 use Illuminate\Support\Facades\Log;
 
 class ArticleController extends Controller
@@ -13,15 +14,9 @@ class ArticleController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(ListArticleRequest $request): object
+    public function index(ListArticleRequest $request, ArticleService $articleService): object
     {
-        $articles = Article::query();
-
-        if ($request->has('include')) {
-            $articles = $articles->with($request->getIncludeParameterValue());
-        }
-
-        $articles = $articles->get();
+        $articles = $articleService->getMany($request->getIncludeParameterValue());
 
         if (! $articles) {
             return response()->json(
@@ -47,7 +42,6 @@ class ArticleController extends Controller
             return response()->json([
                 'article' => new ArticleResource($article),
             ], self::HTTP_STATUS_CODES['created']);
-
         } catch (\Exception $e) {
             Log::critical('Error creating new article'.$e->getMessage());
 
@@ -60,15 +54,9 @@ class ArticleController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(int $id, ListArticleRequest $request) : object
+    public function show(int $id, ListArticleRequest $request, ArticleService $articleService): object
     {
-        $article = Article::find($id);
-
-        if ($request->has('include')) {
-            $article = $article->with($request->getIncludeParameterValue());
-        }
-
-        $article = $article->first();
+        $article = $articleService->getById($id, $request->getIncludeParameterValue());
 
         if (! $article) {
             return response()->json(
@@ -94,7 +82,6 @@ class ArticleController extends Controller
             return response()->json([
                 'article' => new ArticleResource($article),
             ], self::HTTP_STATUS_CODES['created']);
-
         } catch (\Exception $e) {
             Log::critical('Error updating article'.$e->getMessage());
 
@@ -116,7 +103,6 @@ class ArticleController extends Controller
                 ['message' => 'Article deleted successfully'],
                 self::HTTP_STATUS_CODES['success']
             );
-
         } catch (\Exception $e) {
             Log::critical('Error deleting article'.$e->getMessage());
 
