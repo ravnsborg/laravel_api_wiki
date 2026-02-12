@@ -3,43 +3,35 @@
 namespace App\Services\Categories;
 
 use App\Models\Category;
+use Illuminate\Database\Eloquent\Collection;
 
 class CategoryService
 {
-    private object $category;
-
-    public function __construct()
-    {
-        $this->category = Category::query();
-    }
-
     /**
      * Retrieve one category record
      */
-    public function getById(int $id, ?string $joinedTable = null)
+    public function getById(int $id, ?string $joinedTable = null): ?Category
     {
-        $this->appendTable($joinedTable);
+        $query = Category::query();
 
-        return $this->category->find($id);
+        if ($joinedTable) {
+            $query->with($joinedTable);
+        }
+
+        return $query->find($id);
     }
 
     /**
      * Retrieve multiple category records
      */
-    public function getMany(?string $joinedTable = null)
+    public function getMany(?string $joinedTable = null): Collection
     {
-        $this->appendTable($joinedTable);
+        $query = Category::query();
 
-        return $this->category->get();
-    }
-
-    /**
-     * Join table to results if requested
-     */
-    private function appendTable(?string $joinedTable = null): void
-    {
         if ($joinedTable) {
-            $this->category->with($joinedTable);
+            $query->with($joinedTable);
         }
+
+        return $query->get();
     }
 }
