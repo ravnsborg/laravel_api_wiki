@@ -18,7 +18,7 @@ class ArticleController extends Controller
     {
         $articles = $articleService->getMany($request->getIncludeParameterValue());
 
-        if (! $articles) {
+        if ($articles->isEmpty()) {
             return response()->json(
                 ['message' => 'Articles not found'],
                 self::HTTP_STATUS_CODES['not_found']

@@ -19,7 +19,7 @@ class CategoryController extends Controller
 
         $categories = $categoryService->getMany($request->getIncludeParameterValue());
 
-        if (! $categories) {
+        if ($categories->isEmpty()) {
             return response()->json(
                 ['message' => 'Categories not found'],
                 self::HTTP_STATUS_CODES['not_found']
