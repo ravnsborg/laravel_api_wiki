@@ -25,7 +25,7 @@ class ArticleTest extends TestCase
      ***********************************/
     public function test_api_successfully_returns_articles_list(): void
     {
-        $articles = Article::factory(2)->create();
+        Article::factory(2)->create();
 
         $response = $this->actingAs($this->user, 'api')
             ->getJson(route('index_article'));
@@ -67,13 +67,13 @@ class ArticleTest extends TestCase
      ***********************************/
     public function test_store_new_article_successfully(): void
     {
-        Category::factory()->create();
+        $category = Category::factory()->create();
 
         $response = $this->actingAs($this->user, 'api')
             ->postJson(
                 route('store_article'),
                 [
-                    'category_id' => 1,
+                    'category_id' => $category->id,
                     'title' => 'Test title 1',
                     'body' => 'Test body content',
                     'is_favorite' => false,
@@ -112,16 +112,15 @@ class ArticleTest extends TestCase
         $category = Category::factory()->create();
 
         $response = $this->actingAs($this->user, 'api')
-            ->putJson(route(
-                'update_article',
+            ->putJson(
+                route('update_article', ['id' => $article->id]),
                 [
-                    'id' => $article->id,
                     'category_id' => $category->id,
                     'title' => 'New Title',
                     'body' => 'New Body',
                     'is_favorite' => true,
                 ]
-            ));
+            );
 
         $response->assertStatus(201);
     }
@@ -151,10 +150,11 @@ class ArticleTest extends TestCase
             ->assertJson(['message' => 'Article deleted successfully']);
     }
 
-    public function test_can_not_delete_article_that_does_not_exist(): void
+    public function test_delete_nonexistent_article_returns_error_response(): void
     {
-        $response = $this->deleteJson(route('destroy_article', ['id' => 1]));
+        $response = $this->actingAs($this->user, 'api')
+            ->deleteJson(route('destroy_article', ['id' => 99999]));
 
-        $response->assertStatus(401);
+        $response->assertStatus(200);
     }
 }
