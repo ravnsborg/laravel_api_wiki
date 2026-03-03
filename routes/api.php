@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Route;
 | Login Route
 |--------------------------------------------------------------------------
  */
+
 Route::post('/login', [Controllers\AuthController::class, 'login']);
 
 /*
@@ -34,11 +35,11 @@ Route::middleware('auth:api')->group(function () {
         | Article Routes
         |--------------------------------------------------------------------------
          */
-        Route::get('/articles', [Controllers\ArticleController::class, 'index']);
-        Route::get('/articles/{id}', [Controllers\ArticleController::class, 'show']);
-        Route::post('/articles', [Controllers\ArticleController::class, 'store']);
-        Route::put('/articles/{id}', [Controllers\ArticleController::class, 'update']);
-        Route::delete('/articles/{id}', [Controllers\ArticleController::class, 'destroy']);
+        Route::get('/articles', [Controllers\ArticleController::class, 'index'])->name('index_article');
+        Route::get('/articles/{id}', [Controllers\ArticleController::class, 'show'])->name('show_article');
+        Route::post('/articles', [Controllers\ArticleController::class, 'store'])->name('store_article');
+        Route::put('/articles/{id}', [Controllers\ArticleController::class, 'update'])->name('update_article');
+        Route::delete('/articles/{id}', [Controllers\ArticleController::class, 'destroy'])->name('destroy_article');
 
         /*
         |--------------------------------------------------------------------------
@@ -50,6 +51,5 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/categories', [Controllers\CategoryController::class, 'store']);
         Route::put('/categories/{id}', [Controllers\CategoryController::class, 'update']);
         Route::delete('/categories/{id}', [Controllers\CategoryController::class, 'destroy']);
-
     });
 });
