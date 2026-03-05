@@ -46,10 +46,10 @@ Route::middleware('auth:api')->group(function () {
         | Category Routes
         |--------------------------------------------------------------------------
          */
-        Route::get('/categories', [Controllers\CategoryController::class, 'index']);
-        Route::get('/categories/{id}', [Controllers\CategoryController::class, 'show']);
-        Route::post('/categories', [Controllers\CategoryController::class, 'store']);
-        Route::put('/categories/{id}', [Controllers\CategoryController::class, 'update']);
-        Route::delete('/categories/{id}', [Controllers\CategoryController::class, 'destroy']);
+        Route::get('/categories', [Controllers\CategoryController::class, 'index'])->name('index_category');
+        Route::get('/categories/{id}', [Controllers\CategoryController::class, 'show'])->name('show_category');
+        Route::post('/categories', [Controllers\CategoryController::class, 'store'])->name('store_category');
+        Route::put('/categories/{id}', [Controllers\CategoryController::class, 'update'])->name('update_category');
+        Route::delete('/categories/{id}', [Controllers\CategoryController::class, 'destroy'])->name('destroy_category');
     });
 });
