@@ -4,6 +4,7 @@ namespace App\Services\Categories;
 
 use App\Models\Category;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Auth;
 
 class CategoryService
 {
@@ -32,6 +33,6 @@ class CategoryService
             $query->with($joinedTable);
         }
 
-        return $query->get();
+        return $query->where('entity_id', Auth::user()->preferred_entity_id)->get();
     }
 }

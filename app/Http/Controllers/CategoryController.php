@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Categories\CreateUpdateCategoryRequest;
 use App\Http\Requests\Categories\ListCategoryRequest;
+use App\Http\Resources\ArticleResource;
 use App\Http\Resources\CategoryResource;
+use App\Models\Article;
 use App\Models\Category;
 use App\Services\Categories\CategoryService;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CategoryController extends Controller
 {
@@ -22,7 +25,7 @@ class CategoryController extends Controller
         if ($categories->isEmpty()) {
             return response()->json(
                 ['message' => 'Categories not found'],
-                self::HTTP_STATUS_CODES['not_found']
+                self::HTTP_STATUS_CODES['success']
             );
         }
 
@@ -37,19 +40,14 @@ class CategoryController extends Controller
      */
     public function store(CreateUpdateCategoryRequest $request): object
     {
-        try {
-            $category = Category::create($request->validated());
+        $category = Category::create([
+            'entity_id' => Auth::user()->preferred_entity_id,
+            'title' => $request->input('title'),
+        ]);
 
-            return response()->json([
-                'category' => new CategoryResource($category),
-            ], self::HTTP_STATUS_CODES['created']);
-        } catch (\Exception $e) {
-            Log::critical('Error creating new category'.$e->getMessage());
-
-            return response()->json([
-                'message' => 'Failed to create category.',
-            ], self::HTTP_STATUS_CODES['server_error']);
-        }
+        return response()->json([
+            'category' => new CategoryResource($category),
+        ], self::HTTP_STATUS_CODES['created']);
     }
 
     /**
@@ -77,19 +75,13 @@ class CategoryController extends Controller
      */
     public function update(int $id, CreateUpdateCategoryRequest $request): object
     {
-        try {
-            $category = Category::updateOrCreate(['id' => $id], $request->validated());
+        $category = Category::updateOrCreate(['id' => $id], $request->validated());
 
-            return response()->json([
-                'category' => new CategoryResource($category),
-            ], self::HTTP_STATUS_CODES['created']);
-        } catch (\Exception $e) {
-            Log::critical('Error updating category'.$e->getMessage());
-
-            return response()->json([
-                'message' => 'Failed to create category',
-            ], self::HTTP_STATUS_CODES['server_error']);
-        }
+        return response()->json([
+            'category' => new CategoryResource($category),
+        ], $category->wasRecentlyCreated
+            ? self::HTTP_STATUS_CODES['created']
+            : self::HTTP_STATUS_CODES['success']);
     }
 
     /**
@@ -97,19 +89,28 @@ class CategoryController extends Controller
      */
     public function destroy(string $id): object
     {
-        try {
-            Category::destroy($id);
+        $deleted = Category::destroy($id);
 
+        return response()->json(
+            ['message' => 'Category deleted successfully'],
+            self::HTTP_STATUS_CODES['success']
+        );
+    }
+
+    public function category_articles(int $id, Request $request) // : object
+    {
+        $articles = Article::with('category')->whereRelation('category', 'id', $id)->get();
+
+        if (! $articles) {
             return response()->json(
-                ['message' => 'Category deleted successfully'],
-                self::HTTP_STATUS_CODES['success']
+                ['message' => 'No keyword matches found'],
+                self::HTTP_STATUS_CODES['not_found']
             );
-        } catch (\Exception $e) {
-            Log::critical('Error deleting category'.$e->getMessage());
-
-            return response()->json([
-                'message' => 'Failed to delete category.',
-            ], self::HTTP_STATUS_CODES['server_error']);
         }
+
+        return response()->json(
+            ArticleResource::collection($articles),
+            self::HTTP_STATUS_CODES['success']
+        );
     }
 }

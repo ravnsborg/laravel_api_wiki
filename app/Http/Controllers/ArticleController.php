@@ -7,7 +7,8 @@ use App\Http\Requests\Articles\ListArticleRequest;
 use App\Http\Resources\ArticleResource;
 use App\Models\Article;
 use App\Services\Articles\ArticleService;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ArticleController extends Controller
 {
@@ -21,7 +22,7 @@ class ArticleController extends Controller
         if ($articles->isEmpty()) {
             return response()->json(
                 ['message' => 'Articles not found'],
-                self::HTTP_STATUS_CODES['not_found']
+                self::HTTP_STATUS_CODES['success']
             );
         }
 
@@ -36,19 +37,11 @@ class ArticleController extends Controller
      */
     public function store(CreateUpdateArticleRequest $request): object
     {
-        try {
-            $article = Article::create($request->validated());
+        $article = Article::create($request->validated());
 
-            return response()->json([
-                'article' => new ArticleResource($article),
-            ], self::HTTP_STATUS_CODES['created']);
-        } catch (\Exception $e) {
-            Log::critical('Error creating new article'.$e->getMessage());
-
-            return response()->json([
-                'message' => 'Failed to create article',
-            ], self::HTTP_STATUS_CODES['server_error']);
-        }
+        return response()->json([
+            'article' => new ArticleResource($article),
+        ], self::HTTP_STATUS_CODES['created']);
     }
 
     /**
@@ -76,19 +69,19 @@ class ArticleController extends Controller
      */
     public function update(int $id, CreateUpdateArticleRequest $request): object
     {
-        try {
-            $article = Article::updateOrCreate(['id' => $id], $request->validated());
+        $article = Article::query();
 
-            return response()->json([
-                'article' => new ArticleResource($article),
-            ], self::HTTP_STATUS_CODES['created']);
-        } catch (\Exception $e) {
-            Log::critical('Error updating article'.$e->getMessage());
-
-            return response()->json([
-                'message' => 'Failed to create article',
-            ], self::HTTP_STATUS_CODES['server_error']);
+        if ($request->getIncludeParameterValue()) {
+            $article->with($request->getIncludeParameterValue());
         }
+
+        $article = $article->updateOrCreate(['id' => $id], $request->validated());
+
+        return response()->json([
+            'article' => new ArticleResource($article),
+        ], $article->wasRecentlyCreated
+            ? self::HTTP_STATUS_CODES['created']
+            : self::HTTP_STATUS_CODES['success']);
     }
 
     /**
@@ -96,19 +89,60 @@ class ArticleController extends Controller
      */
     public function destroy(string $id): object
     {
-        try {
-            Article::destroy($id);
+        $deleted = Article::destroy($id);
 
+        return response()->json(
+            ['message' => 'Article deleted successfully'],
+            self::HTTP_STATUS_CODES['success']
+        );
+    }
+
+    public function search(Request $request): object
+    {
+        $searchTerm = $request->query('q');
+
+        $articles = Article::with('category')
+            ->where(function ($query) use ($searchTerm) {
+                $query->where('articles.title', 'like', "%{$searchTerm}%")
+                    ->orWhere('articles.body', 'like', "%{$searchTerm}%");
+            })
+            ->orWhereHas('category', function ($query) use ($searchTerm) {
+                $query->where('title', 'like', "%{$searchTerm}%");
+            })
+            ->get();
+
+        if (! $articles) {
             return response()->json(
-                ['message' => 'Article deleted successfully'],
+                ['message' => 'No keyword matches found'],
+                self::HTTP_STATUS_CODES['not_found']
+            );
+        }
+
+        return response()->json(
+            ArticleResource::collection($articles),
+            self::HTTP_STATUS_CODES['success']
+        );
+    }
+
+    /**
+     * Get favorites associated to the user's preferred entity id
+     */
+    public function favorites(): object
+    {
+        $articles = Article::where('is_favorite', true)
+            ->whereRelation('category', 'entity_id', Auth::user()->preferred_entity_id)
+            ->orderBy('title')->get();
+
+        if ($articles->isEmpty()) {
+            return response()->json(
+                ['message' => 'Articles not found'],
                 self::HTTP_STATUS_CODES['success']
             );
-        } catch (\Exception $e) {
-            Log::critical('Error deleting article'.$e->getMessage());
-
-            return response()->json([
-                'message' => 'Failed to delete article',
-            ], self::HTTP_STATUS_CODES['server_error']);
         }
+
+        return response()->json(
+            ArticleResource::collection($articles),
+            self::HTTP_STATUS_CODES['success']
+        );
     }
 }

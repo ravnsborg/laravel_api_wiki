@@ -12,8 +12,17 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->prepend(\Illuminate\Http\Middleware\HandleCors::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Throwable $e, $request) {
+            if ($request->is('api/*')) {
+                report($e); // logs via normal channels/log levels
+
+                return response()->json(
+                    ['message' => 'Something went wrong.'],
+                    401
+                );
+            }
+        });
     })->create();
