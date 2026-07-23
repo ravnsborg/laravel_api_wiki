@@ -15,7 +15,7 @@ class LinkController extends Controller
     public function index()
     {
         // Get all links for now regardless of entity
-        $links = Link::all();
+        $links = Link::orderBy('title')->get();
         // $links = Link::where('entity_id', Auth::user()->preferred_entity_id)->get();
 
         if ($links->isEmpty()) {

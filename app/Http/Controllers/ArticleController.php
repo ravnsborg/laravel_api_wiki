@@ -131,7 +131,8 @@ class ArticleController extends Controller
     {
         $articles = Article::where('is_favorite', true)
             ->whereRelation('category', 'entity_id', Auth::user()->preferred_entity_id)
-            ->orderBy('title')->get();
+            ->orderBy('title')
+            ->get();
 
         if ($articles->isEmpty()) {
             return response()->json(

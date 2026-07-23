@@ -33,6 +33,8 @@ class CategoryService
             $query->with($joinedTable);
         }
 
-        return $query->where('entity_id', Auth::user()->preferred_entity_id)->get();
+        return $query->where('entity_id', Auth::user()->preferred_entity_id)
+            ->orderBy('title')
+            ->get();
     }
 }
