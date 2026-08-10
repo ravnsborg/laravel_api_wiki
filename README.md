@@ -14,6 +14,9 @@ This REST API can be used to access the data layer of my demo Wiki personal info
     ```
     APP_URL=http://127.0.0.1:1234 // Add your own port number
     APP_PORT=1234
+
+    # This config must be updated to match actaul frontend URL for CORS authentication
+    FRONT_END_SITE_URL=http://localhost:5173
    ```
 
 3. Generate a new application key.
@@ -31,7 +34,12 @@ This REST API can be used to access the data layer of my demo Wiki personal info
    ```
 
 
-6. Setup the node package manager then start it up.
+6. Setup the node package manager then start it up. ** If npm is not install, install `node` first
+
+    ```sh
+    brew install node
+    ```
+
     ```
     npm install
     npm run dev
