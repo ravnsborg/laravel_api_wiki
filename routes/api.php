@@ -39,22 +39,22 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/articles/favorites', [Controllers\ArticleController::class, 'favorites'])->name('favorite_articles');
         Route::get('/articles/search', [Controllers\ArticleController::class, 'search'])->name('search_articles');
         Route::get('/articles', [Controllers\ArticleController::class, 'index'])->name('index_article');
-        Route::get('/articles/{id}', [Controllers\ArticleController::class, 'show'])->name('show_article');
+        Route::get('/articles/{id}', [Controllers\ArticleController::class, 'show'])->name('show_article')->whereNumber('id');
         Route::post('/articles', [Controllers\ArticleController::class, 'store'])->name('store_article');
-        Route::match(['put', 'patch'], '/articles/{id}', [Controllers\ArticleController::class, 'update'])->name('update_article');
-        Route::delete('/articles/{id}', [Controllers\ArticleController::class, 'destroy'])->name('destroy_article');
+        Route::match(['put', 'patch'], '/articles/{id}', [Controllers\ArticleController::class, 'update'])->name('update_article')->whereNumber('id');
+        Route::delete('/articles/{id}', [Controllers\ArticleController::class, 'destroy'])->name('destroy_article')->whereNumber('id');
 
         /*
         |--------------------------------------------------------------------------
         | Category Routes
         |--------------------------------------------------------------------------
          */
-        Route::get('/categories/{id}/articles', [Controllers\CategoryController::class, 'category_articles'])->name('category_articles');
+        Route::get('/categories/{id}/articles', [Controllers\CategoryController::class, 'category_articles'])->name('category_articles')->whereNumber('id');
         Route::get('/categories', [Controllers\CategoryController::class, 'index'])->name('index_category');
-        Route::get('/categories/{id}', [Controllers\CategoryController::class, 'show'])->name('show_category');
+        Route::get('/categories/{id}', [Controllers\CategoryController::class, 'show'])->name('show_category')->whereNumber('id');
         Route::post('/categories', [Controllers\CategoryController::class, 'store'])->name('store_category');
-        Route::put('/categories/{id}', [Controllers\CategoryController::class, 'update'])->name('update_category');
-        Route::delete('/categories/{id}', [Controllers\CategoryController::class, 'destroy'])->name('destroy_category');
+        Route::put('/categories/{id}', [Controllers\CategoryController::class, 'update'])->name('update_category')->whereNumber('id');
+        Route::delete('/categories/{id}', [Controllers\CategoryController::class, 'destroy'])->name('destroy_category')->whereNumber('id');
 
         /*
         |--------------------------------------------------------------------------
@@ -82,8 +82,8 @@ Route::middleware('auth:api')->group(function () {
         |--------------------------------------------------------------------------
         */
         Route::get('/users', [Controllers\UserController::class, 'index'])->name('index_user');
-        Route::get('/users/{id}', [Controllers\UserController::class, 'show'])->name('show_user');
-        Route::put('/users/{id}/entities', [Controllers\UserController::class, 'update_entity'])->name('update_user_entity');
+        Route::get('/users/{id}', [Controllers\UserController::class, 'show'])->name('show_user')->whereNumber('id');
+        Route::put('/users/{id}/entities', [Controllers\UserController::class, 'update_entity'])->name('update_user_entity')->whereNumber('id');
 
         Route::get('/user', function (Request $request) {
 

@@ -87,7 +87,7 @@ class CategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id): object
+    public function destroy(int $id): object
     {
         $deleted = Category::destroy($id);
 
@@ -97,7 +97,7 @@ class CategoryController extends Controller
         );
     }
 
-    public function category_articles(int $id, Request $request) // : object
+    public function category_articles(int $id, Request $request): object
     {
         $articles = Article::with('category')->whereRelation('category', 'id', $id)->get();
 
