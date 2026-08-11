@@ -8,7 +8,6 @@ class CreateUpdateLinkRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.
-     *
      */
     public function rules(): array
     {
@@ -17,9 +16,9 @@ class CreateUpdateLinkRequest extends FormRequest
             : 'required';
 
         return [
-            'entity_id' => $validationStrictness . '|integer|exists:entities,id',
-            'title' => $validationStrictness . '|string|max:255',
-            'url' => $validationStrictness . '|url',
+            'entity_id' => $validationStrictness.'|integer|exists:entities,id',
+            'title' => $validationStrictness.'|string|max:255',
+            'url' => $validationStrictness.'|url',
         ];
     }
 }
