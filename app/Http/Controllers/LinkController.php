@@ -87,7 +87,7 @@ class LinkController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id): object
+    public function destroy(int $id): object
     {
         $deleted = Link::destroy($id);
 
