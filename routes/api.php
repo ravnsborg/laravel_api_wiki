@@ -63,6 +63,9 @@ Route::middleware('auth:api')->group(function () {
          */
         Route::get('/links', [Controllers\LinkController::class, 'index'])->name('index_link');
         Route::get('/links/{id}', [Controllers\LinkController::class, 'show'])->name('show_link');
+        Route::post('/links', [Controllers\LinkController::class, 'store'])->name('store_link');
+        Route::match(['put', 'patch'], '/links/{id}', [Controllers\LinkController::class, 'update'])->name('update_link');
+        Route::delete('/links/{id}', [Controllers\LinkController::class, 'destroy'])->name('destroy_link');
 
         /*
         |--------------------------------------------------------------------------
