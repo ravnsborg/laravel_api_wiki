@@ -19,7 +19,7 @@ class CreateUpdateLinkRequest extends FormRequest
         return [
             'entity_id' => $validationStrictness . '|integer|exists:entities,id',
             'title' => $validationStrictness . '|string|max:255',
-            'url' => $validationStrictness . '|string',
+            'url' => $validationStrictness . '|url',
         ];
     }
 }
