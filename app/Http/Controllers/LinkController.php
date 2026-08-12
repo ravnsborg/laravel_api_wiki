@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Links\CreateUpdateLinkRequest;
 use App\Http\Resources\LinkResource;
 use App\Models\Link;
-use Illuminate\Support\Facades\Auth;
 
 class LinkController extends Controller
 {
@@ -15,8 +14,9 @@ class LinkController extends Controller
     public function index(): object
     {
         // Get all links for now regardless of entity
-        $links = Link::orderBy('title')->get();
-        // $links = Link::where('entity_id', Auth::user()->preferred_entity_id)->get();
+        $links = Link::withoutGlobalScope('preferredEntity')
+            ->orderBy('title')
+            ->get();
 
         if ($links->isEmpty()) {
             return response()->json(

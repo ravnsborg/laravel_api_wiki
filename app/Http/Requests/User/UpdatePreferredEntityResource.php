@@ -22,7 +22,7 @@ class UpdatePreferredEntityResource extends FormRequest
     public function rules(): array
     {
         return [
-            'entity_id' => 'required|int',
+            'entity_id' => 'required|int|exists:entities,id',
         ];
     }
 }

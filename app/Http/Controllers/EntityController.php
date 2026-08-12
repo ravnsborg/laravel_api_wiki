@@ -54,7 +54,7 @@ class EntityController extends Controller
                 self::HTTP_STATUS_CODES['server_error']
             );
         }
-        auth()->user()->update(['preferred_entity_id' => $entity->id]);
+        Auth::user()->update(['preferred_entity_id' => $entity->id]);
 
         return response()->json(
             new EntityResource($entity),

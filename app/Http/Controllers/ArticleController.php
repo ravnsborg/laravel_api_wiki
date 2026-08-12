@@ -8,7 +8,6 @@ use App\Http\Resources\ArticleResource;
 use App\Models\Article;
 use App\Services\Articles\ArticleService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class ArticleController extends Controller
 {
@@ -130,7 +129,6 @@ class ArticleController extends Controller
     public function favorites(): object
     {
         $articles = Article::where('is_favorite', true)
-            ->whereRelation('category', 'entity_id', Auth::user()->preferred_entity_id)
             ->orderBy('title')
             ->get();
 
